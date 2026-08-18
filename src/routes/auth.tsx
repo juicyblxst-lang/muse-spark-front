@@ -69,6 +69,8 @@ function AuthPage() {
           <span className="text-display text-2xl">Muse</span>
         </Link>
 
+        <h1 className="mb-6 text-center text-3xl">Open your archive</h1>
+
         <div className="surface-paper rounded-xl p-6 sm:p-8">
           <Tabs defaultValue="signin">
             <TabsList className="w-full">
