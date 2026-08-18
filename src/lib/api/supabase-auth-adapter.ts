@@ -1,5 +1,13 @@
 import type { MuseApi, Session, SignInRequest, SignUpRequest, User } from "@/types/api";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseAuthConfigured } from "@/lib/supabase";
+
+function assertConfigured() {
+  if (!supabaseAuthConfigured) {
+    throw new Error(
+      "Muse authentication is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY, then restart the dev server.",
+    );
+  }
+}
 
 function toMuseUser(user: {
   id: string;
@@ -25,6 +33,7 @@ function toMuseUser(user: {
 }
 
 async function currentSession(): Promise<Session> {
+  assertConfigured();
   const { data, error } = await supabase.auth.getSession();
   if (error) throw error;
   if (!data.session) throw new Error("No active Muse session.");
@@ -42,6 +51,7 @@ export const supabaseAuthApi: Pick<
   "signIn" | "signUp" | "signOut" | "getCurrentUser"
 > = {
   async signIn(input: SignInRequest) {
+    assertConfigured();
     const { error } = await supabase.auth.signInWithPassword({
       email: input.email.trim(),
       password: input.password,
@@ -51,6 +61,7 @@ export const supabaseAuthApi: Pick<
   },
 
   async signUp(input: SignUpRequest) {
+    assertConfigured();
     const { data, error } = await supabase.auth.signUp({
       email: input.email.trim(),
       password: input.password,
@@ -71,11 +82,13 @@ export const supabaseAuthApi: Pick<
   },
 
   async signOut() {
+    assertConfigured();
     const { error } = await supabase.auth.signOut();
     if (error) throw error;
   },
 
   async getCurrentUser() {
+    assertConfigured();
     const { data, error } = await supabase.auth.getUser();
     if (error) {
       // An expired/missing session is a normal signed-out state.
