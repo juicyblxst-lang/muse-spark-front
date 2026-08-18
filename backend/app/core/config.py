@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     app_name: str = "Muse API"
     api_version: str = "v1"
     cors_origins: list[str] = ["http://localhost:3000", "http://localhost:5173"]
+    supabase_url: str = ""
+    supabase_publishable_key: str = ""
 
 
 settings = Settings()
