@@ -10,33 +10,232 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ConnectionsRouteImport } from './routes/connections'
+import { Route as CorrectionsRouteImport } from './routes/corrections'
+import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as LibraryRouteImport } from './routes/library'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as TimelineRouteImport } from './routes/timeline'
+import { Route as UploadRouteImport } from './routes/upload'
+import { Route as DocumentsDocumentIdRouteImport } from './routes/documents.$documentId'
+import { Route as MemoryIndexRouteImport } from './routes/memory.index'
+import { Route as MemoryMemoryIdRouteImport } from './routes/memory.$memoryId'
+import { Route as ProcessingJobIdRouteImport } from './routes/processing.$jobId'
+import { Route as ProvenanceSourceIdRouteImport } from './routes/provenance.$sourceId'
+import { Route as RevivalsIndexRouteImport } from './routes/revivals.index'
+import { Route as RevivalsRevivalIdRouteImport } from './routes/revivals.$revivalId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConnectionsRoute = ConnectionsRouteImport.update({
+  id: '/connections',
+  path: '/connections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CorrectionsRoute = CorrectionsRouteImport.update({
+  id: '/corrections',
+  path: '/corrections',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LibraryRoute = LibraryRouteImport.update({
+  id: '/library',
+  path: '/library',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TimelineRoute = TimelineRouteImport.update({
+  id: '/timeline',
+  path: '/timeline',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UploadRoute = UploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DocumentsDocumentIdRoute = DocumentsDocumentIdRouteImport.update({
+  id: '/documents/$documentId',
+  path: '/documents/$documentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryIndexRoute = MemoryIndexRouteImport.update({
+  id: '/memory/',
+  path: '/memory/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MemoryMemoryIdRoute = MemoryMemoryIdRouteImport.update({
+  id: '/memory/$memoryId',
+  path: '/memory/$memoryId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProcessingJobIdRoute = ProcessingJobIdRouteImport.update({
+  id: '/processing/$jobId',
+  path: '/processing/$jobId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProvenanceSourceIdRoute = ProvenanceSourceIdRouteImport.update({
+  id: '/provenance/$sourceId',
+  path: '/provenance/$sourceId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevivalsIndexRoute = RevivalsIndexRouteImport.update({
+  id: '/revivals/',
+  path: '/revivals/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RevivalsRevivalIdRoute = RevivalsRevivalIdRouteImport.update({
+  id: '/revivals/$revivalId',
+  path: '/revivals/$revivalId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/connections': typeof ConnectionsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/library': typeof LibraryRoute
+  '/settings': typeof SettingsRoute
+  '/timeline': typeof TimelineRoute
+  '/upload': typeof UploadRoute
+  '/documents/$documentId': typeof DocumentsDocumentIdRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/processing/$jobId': typeof ProcessingJobIdRoute
+  '/provenance/$sourceId': typeof ProvenanceSourceIdRoute
+  '/revivals/$revivalId': typeof RevivalsRevivalIdRoute
+  '/memory/': typeof MemoryIndexRoute
+  '/revivals/': typeof RevivalsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/connections': typeof ConnectionsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/library': typeof LibraryRoute
+  '/settings': typeof SettingsRoute
+  '/timeline': typeof TimelineRoute
+  '/upload': typeof UploadRoute
+  '/documents/$documentId': typeof DocumentsDocumentIdRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/processing/$jobId': typeof ProcessingJobIdRoute
+  '/provenance/$sourceId': typeof ProvenanceSourceIdRoute
+  '/revivals/$revivalId': typeof RevivalsRevivalIdRoute
+  '/memory': typeof MemoryIndexRoute
+  '/revivals': typeof RevivalsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/connections': typeof ConnectionsRoute
+  '/corrections': typeof CorrectionsRoute
+  '/dashboard': typeof DashboardRoute
+  '/library': typeof LibraryRoute
+  '/settings': typeof SettingsRoute
+  '/timeline': typeof TimelineRoute
+  '/upload': typeof UploadRoute
+  '/documents/$documentId': typeof DocumentsDocumentIdRoute
+  '/memory/$memoryId': typeof MemoryMemoryIdRoute
+  '/processing/$jobId': typeof ProcessingJobIdRoute
+  '/provenance/$sourceId': typeof ProvenanceSourceIdRoute
+  '/revivals/$revivalId': typeof RevivalsRevivalIdRoute
+  '/memory/': typeof MemoryIndexRoute
+  '/revivals/': typeof RevivalsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/connections'
+    | '/corrections'
+    | '/dashboard'
+    | '/library'
+    | '/settings'
+    | '/timeline'
+    | '/upload'
+    | '/documents/$documentId'
+    | '/memory/$memoryId'
+    | '/processing/$jobId'
+    | '/provenance/$sourceId'
+    | '/revivals/$revivalId'
+    | '/memory/'
+    | '/revivals/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/connections'
+    | '/corrections'
+    | '/dashboard'
+    | '/library'
+    | '/settings'
+    | '/timeline'
+    | '/upload'
+    | '/documents/$documentId'
+    | '/memory/$memoryId'
+    | '/processing/$jobId'
+    | '/provenance/$sourceId'
+    | '/revivals/$revivalId'
+    | '/memory'
+    | '/revivals'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/connections'
+    | '/corrections'
+    | '/dashboard'
+    | '/library'
+    | '/settings'
+    | '/timeline'
+    | '/upload'
+    | '/documents/$documentId'
+    | '/memory/$memoryId'
+    | '/processing/$jobId'
+    | '/provenance/$sourceId'
+    | '/revivals/$revivalId'
+    | '/memory/'
+    | '/revivals/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  ConnectionsRoute: typeof ConnectionsRoute
+  CorrectionsRoute: typeof CorrectionsRoute
+  DashboardRoute: typeof DashboardRoute
+  LibraryRoute: typeof LibraryRoute
+  SettingsRoute: typeof SettingsRoute
+  TimelineRoute: typeof TimelineRoute
+  UploadRoute: typeof UploadRoute
+  DocumentsDocumentIdRoute: typeof DocumentsDocumentIdRoute
+  MemoryMemoryIdRoute: typeof MemoryMemoryIdRoute
+  ProcessingJobIdRoute: typeof ProcessingJobIdRoute
+  ProvenanceSourceIdRoute: typeof ProvenanceSourceIdRoute
+  RevivalsRevivalIdRoute: typeof RevivalsRevivalIdRoute
+  MemoryIndexRoute: typeof MemoryIndexRoute
+  RevivalsIndexRoute: typeof RevivalsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +247,131 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/connections': {
+      id: '/connections'
+      path: '/connections'
+      fullPath: '/connections'
+      preLoaderRoute: typeof ConnectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/corrections': {
+      id: '/corrections'
+      path: '/corrections'
+      fullPath: '/corrections'
+      preLoaderRoute: typeof CorrectionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/library': {
+      id: '/library'
+      path: '/library'
+      fullPath: '/library'
+      preLoaderRoute: typeof LibraryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/timeline': {
+      id: '/timeline'
+      path: '/timeline'
+      fullPath: '/timeline'
+      preLoaderRoute: typeof TimelineRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/upload': {
+      id: '/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof UploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/documents/$documentId': {
+      id: '/documents/$documentId'
+      path: '/documents/$documentId'
+      fullPath: '/documents/$documentId'
+      preLoaderRoute: typeof DocumentsDocumentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/': {
+      id: '/memory/'
+      path: '/memory'
+      fullPath: '/memory/'
+      preLoaderRoute: typeof MemoryIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/memory/$memoryId': {
+      id: '/memory/$memoryId'
+      path: '/memory/$memoryId'
+      fullPath: '/memory/$memoryId'
+      preLoaderRoute: typeof MemoryMemoryIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/processing/$jobId': {
+      id: '/processing/$jobId'
+      path: '/processing/$jobId'
+      fullPath: '/processing/$jobId'
+      preLoaderRoute: typeof ProcessingJobIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/provenance/$sourceId': {
+      id: '/provenance/$sourceId'
+      path: '/provenance/$sourceId'
+      fullPath: '/provenance/$sourceId'
+      preLoaderRoute: typeof ProvenanceSourceIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revivals/': {
+      id: '/revivals/'
+      path: '/revivals'
+      fullPath: '/revivals/'
+      preLoaderRoute: typeof RevivalsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/revivals/$revivalId': {
+      id: '/revivals/$revivalId'
+      path: '/revivals/$revivalId'
+      fullPath: '/revivals/$revivalId'
+      preLoaderRoute: typeof RevivalsRevivalIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  ConnectionsRoute: ConnectionsRoute,
+  CorrectionsRoute: CorrectionsRoute,
+  DashboardRoute: DashboardRoute,
+  LibraryRoute: LibraryRoute,
+  SettingsRoute: SettingsRoute,
+  TimelineRoute: TimelineRoute,
+  UploadRoute: UploadRoute,
+  DocumentsDocumentIdRoute: DocumentsDocumentIdRoute,
+  MemoryMemoryIdRoute: MemoryMemoryIdRoute,
+  ProcessingJobIdRoute: ProcessingJobIdRoute,
+  ProvenanceSourceIdRoute: ProvenanceSourceIdRoute,
+  RevivalsRevivalIdRoute: RevivalsRevivalIdRoute,
+  MemoryIndexRoute: MemoryIndexRoute,
+  RevivalsIndexRoute: RevivalsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
