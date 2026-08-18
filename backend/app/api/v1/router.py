@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from app.api.v1.processing import router as processing_router
 from app.api.v1.uploads import router as uploads_router
 
 api_router = APIRouter()
@@ -11,3 +12,4 @@ async def api_health() -> dict[str, str]:
 
 
 api_router.include_router(uploads_router)
+api_router.include_router(processing_router)
