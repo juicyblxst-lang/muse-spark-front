@@ -32,31 +32,50 @@ import type {
 /**
  * Real HTTP implementation of the Muse API contract.
  *
- * Nothing in the UI needs to change when this replaces the mock adapter —
- * flip `VITE_MUSE_API_MODE=http` once the backend exists.
+ * This adapter is intentionally transport-only. Authentication, ingestion,
+ * extraction, entity resolution, relationship extraction, provenance,
+ * memory and revival intelligence belong to the backend/intelligence layer.
  */
 
 async function request<T>(
   path: string,
-  init?: { method?: string; body?: unknown; query?: Record<string, string | undefined> },
+  init?: {
+    method?: string;
+    body?: unknown;
+    query?: Record<string, string | undefined>;
+  },
 ): Promise<T> {
-  const url = new URL(`${API_BASE_URL}${path}`, "http://local");
+  const base = import.meta.env["VITE_MUSE_API_URL"] ?? "";
+  const url = new URL(`${base}${API_BASE_URL}${path}`, window.location.origin);
+
   for (const [key, value] of Object.entries(init?.query ?? {})) {
     if (value !== undefined) url.searchParams.set(key, value);
   }
 
-  const response = await fetch(`${url.pathname}${url.search}`, {
+  const response = await fetch(url.toString(), {
     method: init?.method ?? "GET",
-    headers: { "content-type": "application/json" },
-    body: init?.body === undefined ? null : JSON.stringify(init.body),
+    headers: init?.body === undefined ? undefined : { "content-type": "application/json" },
+    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
+    credentials: "include",
   });
 
   if (!response.ok) {
-    throw Object.assign(new Error(`Muse API ${response.status}`), {
+    let detail = "";
+    try {
+      const payload = (await response.json()) as { detail?: unknown; message?: unknown };
+      const value = payload.detail ?? payload.message;
+      if (typeof value === "string") detail = `: ${value}`;
+    } catch {
+      // Preserve the HTTP error when the backend does not return JSON.
+    }
+
+    throw Object.assign(new Error(`Muse API ${response.status}${detail}`), {
       code: String(response.status),
+      status: response.status,
     });
   }
 
+  if (response.status === 204) return undefined as T;
   return (await response.json()) as T;
 }
 
