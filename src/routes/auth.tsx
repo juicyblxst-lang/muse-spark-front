@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { museApi } from "@/lib/api";
+import { supabaseAuthConfigured } from "@/lib/supabase";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
@@ -39,6 +40,8 @@ function AuthPage() {
       });
       toast.success("Welcome back");
       await navigate({ to: "/dashboard" });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to sign in");
     } finally {
       setPending(false);
     }
@@ -56,6 +59,8 @@ function AuthPage() {
       });
       toast.success("Archive created");
       await navigate({ to: "/upload" });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Unable to create your account");
     } finally {
       setPending(false);
     }
@@ -86,23 +91,11 @@ function AuthPage() {
               <form className="space-y-4" onSubmit={handleSignIn}>
                 <div className="space-y-2">
                   <Label htmlFor="signin-email">Email</Label>
-                  <Input
-                    id="signin-email"
-                    name="email"
-                    type="email"
-                    required
-                    defaultValue="you@muse.studio"
-                  />
+                  <Input id="signin-email" name="email" type="email" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
-                  <Input
-                    id="signin-password"
-                    name="password"
-                    type="password"
-                    required
-                    defaultValue="muse"
-                  />
+                  <Input id="signin-password" name="password" type="password" required />
                 </div>
                 <Button type="submit" className="w-full" disabled={pending}>
                   {pending ? "Opening archive…" : "Sign in"}
@@ -122,7 +115,7 @@ function AuthPage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input id="signup-password" name="password" type="password" required />
+                  <Input id="signup-password" name="password" type="password" minLength={6} required />
                 </div>
                 <Button type="submit" className="w-full" disabled={pending}>
                   {pending ? "Creating…" : "Create archive"}
@@ -133,7 +126,9 @@ function AuthPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Frontend preview — authentication is mocked and no credentials leave the browser.
+          {supabaseAuthConfigured
+            ? "Your account is secured by Supabase Auth. Sessions persist across browser refreshes."
+            : "Supabase Auth is not configured yet. Add the Muse Supabase environment variables to enable real accounts."}
         </p>
       </div>
     </div>
