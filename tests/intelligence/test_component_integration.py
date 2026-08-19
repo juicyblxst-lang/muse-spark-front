@@ -130,7 +130,7 @@ async def test_component_chain_preserves_contracts_provenance_ambiguity_and_time
     canonical = normalize_document(ingested)
     assert canonical.text == ingested.text
     assert canonical.file_name == FIXTURE.name
-    assert canonical.blocks[0].text == source_text
+    assert canonical.blocks[0].text == source_text.strip()
 
     extraction_payload = {
         "people": [
