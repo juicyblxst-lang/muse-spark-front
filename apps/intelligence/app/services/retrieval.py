@@ -72,6 +72,7 @@ class RetrievalService:
             item = _as_dict(result)
             body = item.get("body")
             body = _as_dict(body) if body is not None else item
+            metadata = _as_dict(body.get("metadata", item.get("metadata", {})))
 
             memories.append(item)
             entities.extend(_as_dict(v) for v in body.get("entities", []))
@@ -80,7 +81,7 @@ class RetrievalService:
 
             for source in body.get("sources", body.get("source_references", [])):
                 sources.append(_as_dict(source))
-            for source in body.get("provenance", []):
+            for source in body.get("provenance", metadata.get("provenance", [])):
                 provenance.append(_as_dict(source))
 
         return RetrievedContext(
