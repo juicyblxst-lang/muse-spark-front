@@ -119,6 +119,10 @@ class FakeStorage:
     def __init__(self) -> None:
         self.files: dict[str, bytes] = {}
 
+    def from_(self, bucket: str):
+        assert bucket == "muse-documents"
+        return self
+
     def upload(self, path: str, payload: bytes, options: dict[str, Any]) -> None:
         self.files[path] = payload
 
