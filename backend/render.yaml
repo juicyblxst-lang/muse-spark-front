@@ -1,0 +1,34 @@
+services:
+  - type: web
+    name: muse-api
+    runtime: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+      - key: SIBYL_DB_PATH
+        value: /var/data/sibyl/muse.sqlite3
+      - key: STORAGE_ROOT
+        value: /var/data/muse
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_PUBLISHABLE_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: LLM_API_KEY
+        sync: false
+      - key: LLM_MODEL
+        sync: false
+      - key: OPENCLAW_API_KEY
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+    disk:
+      name: muse-persistent-data
+      mountPath: /var/data
+      sizeGB: 1
