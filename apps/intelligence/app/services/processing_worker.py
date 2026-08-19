@@ -3,10 +3,10 @@ from __future__ import annotations
 import asyncio
 import tempfile
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Protocol
 
-from app.services.processing_state import ProcessingStage
 from app.services.system_pipeline import MuseComponentPipeline, PipelineRun
 
 
@@ -32,20 +32,9 @@ class ProcessingRunResult:
 
 
 class ProcessingWorker:
-    """Executes one queued processing job against the real component pipeline.
+    """Execute one queued job against the real component pipeline."""
 
-    Storage, persistence, and model/provider clients are injected. The worker
-    therefore owns job execution without silently creating alternate persistence
-    or intelligence implementations.
-    """
-
-    def __init__(
-        self,
-        *,
-        storage: ProcessingStorage,
-        repository: ProcessingRepository,
-        pipelines: PipelineProvider,
-    ) -> None:
+    def __init__(self, *, storage: ProcessingStorage, repository: ProcessingRepository, pipelines: PipelineProvider) -> None:
         self.storage = storage
         self.repository = repository
         self.pipelines = pipelines
@@ -60,7 +49,6 @@ class ProcessingWorker:
             raise LookupError("document not found")
 
         self._update(job_id, user_id, status="processing", progress=0, current_stage="ingestion", error=None)
-
         filename = Path(str(document["file_name"])).name
         storage_path = f"{user_id}/{document_id}/{filename}"
         try:
@@ -68,17 +56,10 @@ class ProcessingWorker:
             with tempfile.TemporaryDirectory(prefix="muse-processing-") as temp_dir:
                 source = Path(temp_dir) / filename
                 source.write_bytes(payload)
-
                 pipeline = self.pipelines.build(user_id)
 
-                async def stage(stage_name: ProcessingStage, progress: int) -> None:
-                    self._update(
-                        job_id,
-                        user_id,
-                        status="processing",
-                        progress=progress,
-                        current_stage=stage_name.value,
-                    )
+                async def stage(stage_name: str, progress: int) -> None:
+                    self._update(job_id, user_id, status="processing", progress=progress, current_stage=stage_name)
 
                 result = await pipeline.run(
                     str(source),
@@ -94,7 +75,7 @@ class ProcessingWorker:
                 status="complete",
                 progress=100,
                 current_stage="memory",
-                completed_at="now",
+                completed_at=datetime.now(timezone.utc).isoformat(),
                 error=None,
                 discovered={
                     "memories": 1,
@@ -106,13 +87,7 @@ class ProcessingWorker:
             )
             return ProcessingRunResult(job_id=job_id, document_id=document_id, pipeline=result)
         except Exception as exc:
-            self._update(
-                job_id,
-                user_id,
-                status="failed",
-                completed_at="now",
-                error=str(exc),
-            )
+            self._update(job_id, user_id, status="failed", completed_at=datetime.now(timezone.utc).isoformat(), error=str(exc))
             raise
 
     def _update(self, job_id: str, user_id: str, **values: Any) -> None:
