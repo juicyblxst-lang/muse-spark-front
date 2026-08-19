@@ -67,14 +67,6 @@ class RetryService:
         )
         self._attempts.append(job_id, attempt)
 
-        # Validation and permanent failures never auto-retry.
-        if error_class in {ErrorClass.VALIDATION, ErrorClass.PERMANENT}:
-            return self._state.fail(job_id, user_id, error)
-
-        # Transient failure: only retry while another bounded attempt remains.
-        if error_class == ErrorClass.TRANSIENT and job.attempt < self.MAX_ATTEMPTS:
-            return self._state.fail(job_id, user_id, error)
-
         return self._state.fail(job_id, user_id, error)
 
     def retry(self, job_id: str, user_id: str) -> ProcessingJob:
@@ -83,6 +75,15 @@ class RetryService:
             raise ValueError("only failed jobs can be explicitly retried")
         if job.attempt >= self.MAX_ATTEMPTS:
             raise ValueError("maximum retry attempts reached")
+
+        attempts = self._attempts.list_for_job(job_id)
+        if not attempts:
+            raise ValueError("failed job has no recorded attempt")
+
+        latest = attempts[-1]
+        if latest.error_class != ErrorClass.TRANSIENT:
+            raise ValueError("only transient failures can be retried")
+
         return self._state.start(job_id, user_id)
 
     def attempts_for(self, job_id: str) -> list[ProcessingAttempt]:
