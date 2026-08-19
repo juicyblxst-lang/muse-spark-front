@@ -17,12 +17,12 @@ export const endpoints = {
     overview: () => `/dashboard`,
   },
   documents: {
-    createUpload: () => `/documents/uploads`,
+    createUpload: () => `/uploads`,
     list: () => `/documents`,
     detail: (id: string) => `/documents/${id}`,
   },
   processing: {
-    job: (jobId: string) => `/processing/jobs/${jobId}`,
+    job: (jobId: string) => `/processing/${jobId}`,
   },
   memories: {
     search: () => `/memories/search`,
