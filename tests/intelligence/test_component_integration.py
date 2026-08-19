@@ -6,12 +6,8 @@ from typing import Any, Sequence
 
 import pytest
 
-from app.services.entity_resolution import (
-    EntityCandidate,
-    ResolutionStatus,
-    resolve_extraction,
-)
-from app.services.extraction import ExtractedItem, ExtractionResult, extract_document
+from app.services.entity_resolution import EntityCandidate, ResolutionStatus, resolve_extraction
+from app.services.extraction import extract_document
 from app.services.ingestion import DoclingIngestionService
 from app.services.memory_mapper import (
     Confidence,
@@ -28,21 +24,8 @@ from app.services.provenance import (
     create_provenance_record,
     validate_source_provenance,
 )
-from app.services.relationships import (
-    RelationshipEntity,
-    RelationshipEvidenceType,
-    RelationshipGraph,
-    RelationshipExtractionStage,
-    extract_relationships,
-)
-from app.services.temporal_analysis import (
-    TemporalAnalysis,
-    TemporalEvent,
-    TemporalPrecision,
-    TemporalReference,
-    TemporalRelation,
-    analyze_temporal,
-)
+from app.services.relationships import extract_relationships
+from app.services.temporal_analysis import TemporalPrecision, analyze_temporal
 
 
 FIXTURE = Path(__file__).parents[1] / "fixtures" / "muse_component_chain.md"
@@ -133,7 +116,8 @@ def _source_reference() -> SourceReference:
     )
 
 
-def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monkeypatch):
+@pytest.mark.asyncio
+async def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monkeypatch):
     source_text = FIXTURE.read_text(encoding="utf-8")
     converter = MockDoclingConverter(source_text)
     ingestion = DoclingIngestionService()
@@ -150,11 +134,7 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
 
     extraction_payload = {
         "people": [
-            {
-                "name": "Alice",
-                "description": "Muse project lead",
-                "evidence": [SOURCE_EVIDENCE],
-            },
+            {"name": "Alice", "description": "Muse project lead", "evidence": [SOURCE_EVIDENCE]},
             {
                 "name": "Rose",
                 "description": "Person mentioned in the design discussion",
@@ -165,7 +145,7 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
             {
                 "name": "Muse",
                 "description": "The project",
-                "evidence": ["Alice started the Muse project in 2024."],
+                "evidence": [SOURCE_EVIDENCE],
             }
         ],
     }
@@ -198,13 +178,7 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
         entity_type="project",
         context=["project", "2024"],
     )
-    resolver = MockResolver(
-        {
-            "Alice": [alice],
-            "Rose": [rose_a, rose_b],
-            "Muse": [muse],
-        }
-    )
+    resolver = MockResolver({"Alice": [alice], "Rose": [rose_a, rose_b], "Muse": [muse]})
     resolved = await resolve_extraction(
         extraction,
         user_id="user-component-1",
@@ -238,9 +212,7 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
     }
     relationship_client = MockRelationshipClient(relationship_payload)
     relationship_graph = await extract_relationships(
-        resolved,
-        client=relationship_client,
-        extraction_run_id=RUN_ID,
+        resolved, client=relationship_client, extraction_run_id=RUN_ID
     )
     assert relationship_client.received_resolved is resolved
     relationship = relationship_graph.relationships[0]
@@ -277,9 +249,7 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
     }
     temporal_client = MockTemporalClient(temporal_payload)
     temporal = await analyze_temporal(
-        relationship_graph,
-        client=temporal_client,
-        extraction_run_id=RUN_ID,
+        relationship_graph, client=temporal_client, extraction_run_id=RUN_ID
     )
     assert temporal_client.received_relationships is relationship_graph
     assert temporal.events[0].precision is TemporalPrecision.YEAR
@@ -356,7 +326,6 @@ def test_component_chain_preserves_contracts_provenance_ambiguity_and_time(monke
     assert sibyl.written[0].sources[0].document_id == DOCUMENT_ID
     assert sibyl.written[0].timelines == memory.timelines
 
-    # Generated model output is not allowed to become source evidence.
     generated = provenance.model_copy(update={"kind": ProvenanceKind.GENERATED})
     with pytest.raises(ValueError, match="generated content cannot be used as source evidence"):
         validate_source_provenance([generated])
@@ -378,7 +347,4 @@ def test_generated_content_never_passes_as_source_evidence():
 
 
 def test_external_services_are_mocked():
-    # This suite intentionally instantiates only local pipeline contracts.
-    # Docling is replaced by MockDoclingConverter, LLM stages by mock clients,
-    # and persistence by MockSibyl; no Supabase client is imported or contacted.
     assert True
