@@ -4,7 +4,7 @@ services:
     runtime: docker
     dockerfilePath: ./apps/intelligence/Dockerfile
     dockerContext: ./apps/intelligence
-    healthCheckPath: /health
+    healthCheckPath: /ready
     envVars:
       - key: ENVIRONMENT
         value: production
@@ -20,9 +20,13 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
         sync: false
+      - key: LLM_PROVIDER
+        sync: false
       - key: LLM_API_KEY
         sync: false
       - key: LLM_MODEL
+        sync: false
+      - key: OPENCLAW_BASE_URL
         sync: false
       - key: OPENCLAW_API_KEY
         sync: false
