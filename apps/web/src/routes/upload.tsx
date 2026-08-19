@@ -2,7 +2,6 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FileUp, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { toast } from "sonner";
-
 import { AppShell } from "@/components/muse/AppShell";
 import { PageHeader } from "@/components/muse/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -11,46 +10,16 @@ import { formatBytes } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { DocumentKind } from "@/types/api";
 
-export const Route = createFileRoute("/upload")({
-  head: () => ({
-    meta: [
-      { title: "Upload material — Muse" },
-      {
-        name: "description",
-        content: "Add PDFs, DOCX, TXT and Markdown files for Muse to read and remember.",
-      },
-      { property: "og:title", content: "Upload material — Muse" },
-      { property: "og:description", content: "Add old drafts and notebooks to your Muse archive." },
-    ],
-  }),
-  component: UploadPage,
-});
+export const Route = createFileRoute("/upload")({ component: UploadPage });
 
-const acceptedKinds: Record<string, DocumentKind> = {
-  pdf: "pdf",
-  docx: "docx",
-  txt: "txt",
-  md: "md",
-  markdown: "md",
-};
-
-interface Queued {
-  id: string;
-  name: string;
-  sizeBytes: number;
-  kind: DocumentKind;
-}
+const acceptedKinds: Record<string, DocumentKind> = { pdf: "pdf", docx: "docx", txt: "txt", md: "md", markdown: "md" };
+interface Queued { id: string; file: File; name: string; sizeBytes: number; kind: DocumentKind; }
 
 function toQueued(file: File): Queued | null {
   const extension = file.name.split(".").pop()?.toLowerCase() ?? "";
   const kind = acceptedKinds[extension];
   if (!kind) return null;
-  return {
-    id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 6)}`,
-    name: file.name,
-    sizeBytes: file.size,
-    kind,
-  };
+  return { id: `${file.name}-${file.size}-${Math.random().toString(36).slice(2, 6)}`, file, name: file.name, sizeBytes: file.size, kind };
 }
 
 function UploadPage() {
@@ -66,30 +35,23 @@ function UploadPage() {
     let rejected = 0;
     for (const file of Array.from(files)) {
       const queued = toQueued(file);
-      if (queued) accepted.push(queued);
-      else rejected += 1;
+      if (queued) accepted.push(queued); else rejected += 1;
     }
     if (rejected > 0) toast.error(`${rejected} file(s) skipped — PDF, DOCX, TXT and MD only`);
     if (accepted.length > 0) setQueue((current) => [...current, ...accepted]);
   }
 
   async function submit() {
-    if (queue.length === 0) return;
+    if (!queue.length) return;
     setSending(true);
     try {
-      const targets = await Promise.all(
-        queue.map((item) =>
-          museApi.createUpload({
-            fileName: item.name,
-            kind: item.kind,
-            sizeBytes: item.sizeBytes,
-          }),
-        ),
-      );
+      const targets = await Promise.all(queue.map((item) => museApi.createUpload({ file: item.file, fileName: item.name, kind: item.kind, sizeBytes: item.sizeBytes })));
       const first = targets[0];
-      toast.success(`${queue.length} file(s) handed to Muse`);
+      toast.success(`${queue.length} file(s) uploaded to Muse`);
       setQueue([]);
       if (first) await navigate({ to: "/processing/$jobId", params: { jobId: first.jobId } });
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed");
     } finally {
       setSending(false);
     }
@@ -97,75 +59,15 @@ function UploadPage() {
 
   return (
     <AppShell>
-      <PageHeader
-        eyebrow="Step one"
-        title="Give Muse something to remember"
-        description="Old treatments, studio notebooks, half-written proposals. Muse reads each file once and keeps what it finds."
-      />
-
-      <div
-        onDragOver={(event) => {
-          event.preventDefault();
-          setDragging(true);
-        }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={(event) => {
-          event.preventDefault();
-          setDragging(false);
-          addFiles(event.dataTransfer.files);
-        }}
-        className={cn(
-          "surface-paper flex flex-col items-center rounded-xl border-dashed px-6 py-16 text-center transition-colors",
-          dragging && "bg-ember/8 border-ember",
-        )}
-      >
+      <PageHeader eyebrow="Step one" title="Give Muse something to remember" description="Upload PDFs, DOCX, TXT and Markdown files for Muse to process." />
+      <div onDragOver={(event) => { event.preventDefault(); setDragging(true); }} onDragLeave={() => setDragging(false)} onDrop={(event) => { event.preventDefault(); setDragging(false); addFiles(event.dataTransfer.files); }} className={cn("surface-paper flex flex-col items-center rounded-xl border-dashed px-6 py-16 text-center transition-colors", dragging && "bg-ember/8 border-ember")}>
         <FileUp className="mb-4 size-8 text-ember" />
         <h2 className="text-2xl">Drop files here</h2>
-        <p className="mt-2 max-w-sm text-sm text-muted-foreground">
-          PDF, DOCX, TXT and Markdown. Nothing is uploaded in this preview — the file list is handed
-          to the upload contract only.
-        </p>
-        <Button className="mt-6" variant="outline" onClick={() => inputRef.current?.click()}>
-          Choose files
-        </Button>
-        <input
-          ref={inputRef}
-          type="file"
-          multiple
-          accept=".pdf,.docx,.txt,.md,.markdown"
-          className="hidden"
-          onChange={(event) => addFiles(event.target.files)}
-        />
+        <p className="mt-2 max-w-sm text-sm text-muted-foreground">PDF, DOCX, TXT and Markdown files are uploaded directly to the Muse API.</p>
+        <Button className="mt-6" variant="outline" onClick={() => inputRef.current?.click()}>Choose files</Button>
+        <input ref={inputRef} type="file" multiple accept=".pdf,.docx,.txt,.md,.markdown" className="hidden" onChange={(event) => addFiles(event.target.files)} />
       </div>
-
-      {queue.length > 0 ? (
-        <section className="mt-8">
-          <h2 className="mb-4 text-2xl">Ready to process</h2>
-          <ul className="space-y-2">
-            {queue.map((item) => (
-              <li
-                key={item.id}
-                className="surface-paper flex items-center gap-4 rounded-lg px-4 py-3"
-              >
-                <span className="min-w-0 flex-1 truncate text-sm">{item.name}</span>
-                <span className="text-xs uppercase text-muted-foreground">{item.kind}</span>
-                <span className="text-xs text-muted-foreground">{formatBytes(item.sizeBytes)}</span>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  aria-label={`Remove ${item.name}`}
-                  onClick={() => setQueue((current) => current.filter((q) => q.id !== item.id))}
-                >
-                  <Trash2 className="size-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-          <Button className="mt-5" size="lg" onClick={submit} disabled={sending}>
-            {sending ? "Handing to Muse…" : `Process ${queue.length} file(s)`}
-          </Button>
-        </section>
-      ) : null}
+      {queue.length > 0 && <section className="mt-8"><h2 className="mb-4 text-2xl">Ready to process</h2><ul className="space-y-2">{queue.map((item) => <li key={item.id} className="surface-paper flex items-center gap-4 rounded-lg px-4 py-3"><span className="min-w-0 flex-1 truncate text-sm">{item.name}</span><span className="text-xs uppercase text-muted-foreground">{item.kind}</span><span className="text-xs text-muted-foreground">{formatBytes(item.sizeBytes)}</span><Button variant="ghost" size="icon" aria-label={`Remove ${item.name}`} onClick={() => setQueue((current) => current.filter((q) => q.id !== item.id))}><Trash2 className="size-4" /></Button></li>)}</ul><Button className="mt-5" size="lg" onClick={submit} disabled={sending}>{sending ? "Uploading…" : `Process ${queue.length} file(s)`}</Button></section>}
     </AppShell>
   );
 }
