@@ -2,8 +2,8 @@ services:
   - type: web
     name: muse-api
     runtime: docker
-    dockerfilePath: ./backend/Dockerfile
-    dockerContext: ./backend
+    dockerfilePath: ./apps/intelligence/Dockerfile
+    dockerContext: ./apps/intelligence
     healthCheckPath: /health
     envVars:
       - key: ENVIRONMENT
