@@ -29,13 +29,7 @@ import type {
   User,
 } from "@/types/api";
 
-/**
- * Real HTTP implementation of the Muse API contract.
- *
- * This adapter is intentionally transport-only. Authentication, ingestion,
- * extraction, entity resolution, relationship extraction, provenance,
- * memory and revival intelligence belong to the backend/intelligence layer.
- */
+/** Real HTTP implementation of the Muse API contract. */
 
 async function request<T>(
   path: string,
@@ -43,6 +37,7 @@ async function request<T>(
     method?: string;
     body?: unknown;
     query?: Record<string, string | undefined>;
+    formData?: boolean;
   },
 ): Promise<T> {
   const base = import.meta.env["VITE_MUSE_API_URL"] ?? "";
@@ -54,8 +49,16 @@ async function request<T>(
 
   const response = await fetch(url.toString(), {
     method: init?.method ?? "GET",
-    headers: init?.body === undefined ? undefined : { "content-type": "application/json" },
-    body: init?.body === undefined ? undefined : JSON.stringify(init.body),
+    headers:
+      init?.body === undefined || init?.formData
+        ? undefined
+        : { "content-type": "application/json" },
+    body:
+      init?.body === undefined
+        ? undefined
+        : init?.formData
+          ? (init.body as FormData)
+          : JSON.stringify(init.body),
     credentials: "include",
   });
 
@@ -68,7 +71,6 @@ async function request<T>(
     } catch {
       // Preserve the HTTP error when the backend does not return JSON.
     }
-
     throw Object.assign(new Error(`Muse API ${response.status}${detail}`), {
       code: String(response.status),
       status: response.status,
@@ -80,18 +82,22 @@ async function request<T>(
 }
 
 export const httpApi: MuseApi = {
-  signIn: (input: SignInRequest) =>
-    request<Session>(endpoints.auth.signIn(), { method: "POST", body: input }),
-  signUp: (input: SignUpRequest) =>
-    request<Session>(endpoints.auth.signUp(), { method: "POST", body: input }),
+  signIn: (input: SignInRequest) => request<Session>(endpoints.auth.signIn(), { method: "POST", body: input }),
+  signUp: (input: SignUpRequest) => request<Session>(endpoints.auth.signUp(), { method: "POST", body: input }),
   signOut: () => request<void>(endpoints.auth.signOut(), { method: "POST" }),
   getCurrentUser: () => request<User | null>(endpoints.auth.me()),
 
   getDashboard: () => request<DashboardOverview>(endpoints.dashboard.overview()),
-
-  createUpload: (input: CreateUploadRequest) =>
-    request<UploadTarget>(endpoints.documents.createUpload(), { method: "POST", body: input }),
-  listDocuments: (params?: { query?: string | undefined; status?: DocumentStatus | undefined }) =>
+  createUpload: (input: CreateUploadRequest) => {
+    const form = new FormData();
+    form.append("file", input.file);
+    return request<UploadTarget>(endpoints.documents.createUpload(), {
+      method: "POST",
+      body: form,
+      formData: true,
+    });
+  },
+  listDocuments: (params?: { query?: string; status?: DocumentStatus }) =>
     request<Paginated<DocumentSummary>>(endpoints.documents.list(), {
       query: { query: params?.query, status: params?.status },
     }),
@@ -99,33 +105,20 @@ export const httpApi: MuseApi = {
 
   getProcessingJob: (jobId: string) => request<ProcessingJob>(endpoints.processing.job(jobId)),
 
-  searchMemories: (input: MemorySearchRequest) =>
-    request<MemorySearchResponse>(endpoints.memories.search(), { method: "POST", body: input }),
+  searchMemories: (input: MemorySearchRequest) => request<MemorySearchResponse>(endpoints.memories.search(), { method: "POST", body: input }),
   getMemory: (id: string) => request<MemoryDetail>(endpoints.memories.detail(id)),
   getForgottenMemories: () => request<MemorySummary[]>(endpoints.memories.forgotten()),
 
-  getConnections: (params?: { entityId?: string | undefined }) =>
-    request<ConnectionGraph>(endpoints.graph.connections(), {
-      query: { entityId: params?.entityId },
-    }),
-  getTimeline: (params?: { from?: IsoDateTime | undefined; to?: IsoDateTime | undefined }) =>
-    request<TimelineResponse>(endpoints.graph.timeline(), {
-      query: { from: params?.from, to: params?.to },
-    }),
+  getConnections: (params?: { entityId?: string }) => request<ConnectionGraph>(endpoints.graph.connections(), { query: { entityId: params?.entityId } }),
+  getTimeline: (params?: { from?: IsoDateTime; to?: IsoDateTime }) => request<TimelineResponse>(endpoints.graph.timeline(), { query: { from: params?.from, to: params?.to } }),
 
-  requestRevival: (input: RevivalRequest) =>
-    request<RevivalResult>(endpoints.revival.create(), { method: "POST", body: input }),
+  requestRevival: (input: RevivalRequest) => request<RevivalResult>(endpoints.revival.create(), { method: "POST", body: input }),
   listRevivals: () => request<RevivalResult[]>(endpoints.revival.list()),
   getRevival: (id: string) => request<RevivalResult>(endpoints.revival.detail(id)),
 
-  getProvenance: (sourceId: string) =>
-    request<ProvenanceDetail>(endpoints.provenance.detail(sourceId)),
-
-  submitCorrection: (input: CorrectionRequest) =>
-    request<Correction>(endpoints.corrections.create(), { method: "POST", body: input }),
+  getProvenance: (sourceId: string) => request<ProvenanceDetail>(endpoints.provenance.detail(sourceId)),
+  submitCorrection: (input: CorrectionRequest) => request<Correction>(endpoints.corrections.create(), { method: "POST", body: input }),
   listCorrections: () => request<Correction[]>(endpoints.corrections.list()),
-
   getSettings: () => request<Settings>(endpoints.settings.get()),
-  updateSettings: (input: SettingsUpdate) =>
-    request<Settings>(endpoints.settings.update(), { method: "PATCH", body: input }),
+  updateSettings: (input: SettingsUpdate) => request<Settings>(endpoints.settings.update(), { method: "PATCH", body: input }),
 };
