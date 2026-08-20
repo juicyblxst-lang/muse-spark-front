@@ -75,7 +75,7 @@ class SQLiteStore:
         allowed = {"status", "current_stage", "progress", "discovered_json", "error_message"}
         updates = [(key, value) for key, value in values.items() if key in allowed]
         if not updates: return
-        assignments = ", \".join(f"{key}=?" for key, _ in updates)
+        assignments = ", ".join(f"{key}=?" for key, _ in updates)
         params = [value for _, value in updates] + [job_id, user_id]
         with self.connect() as db:
             db.execute(f"UPDATE processing_jobs SET {assignments} WHERE id=? AND user_id=?", params)
