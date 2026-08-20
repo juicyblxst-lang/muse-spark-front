@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from .storage import SQLiteStore
 import os
 
 app = FastAPI(title="Muse Intelligence", version="0.1.0")
@@ -11,6 +13,14 @@ if allowed_origins:
 @app.get("/health")
 async def health() -> dict[str, str]:
     return {"status": "ok", "service": "muse-intelligence"}
+
+@app.get("/ready")
+async def readiness() -> dict[str, str]:
+    database_path = os.getenv("MUSE_DATABASE_PATH")
+    if not database_path:
+        return JSONResponse(status_code=503, content={"status": "not_ready", "reason": "MUSE_DATABASE_PATH is not configured"})
+    SQLiteStore(database_path)
+    return {"status": "ready", "database": "configured"}
 
 @app.get("/api/v1/auth/me")
 async def current_user():
