@@ -1,16 +1,15 @@
 import type { MuseApi } from "@/types/api";
 import { httpApi } from "./http-adapter";
-import { mockApi } from "./mock-adapter";
 
 export { endpoints, API_BASE_URL } from "./endpoints";
 
-const mode = import.meta.env["VITE_MUSE_API_MODE"] ?? "http";
+
 
 /**
  * The single API instance the UI talks to. The mock layer is an explicit opt-in for isolated UI development;
  * production and deployed environments use the real backend by default.
  */
-export const museApi: MuseApi = mode === "http" ? httpApi : mockApi;
+export const museApi: MuseApi = httpApi;
 
 export const queryKeys = {
   currentUser: ["currentUser"] as const,
