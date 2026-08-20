@@ -133,7 +133,7 @@ function AuthPage() {
         </div>
 
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Frontend preview — authentication is mocked and no credentials leave the browser.
+          Authentication is handled by the configured Muse API adapter.
         </p>
       </div>
     </div>
