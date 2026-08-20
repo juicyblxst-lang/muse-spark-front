@@ -6,8 +6,7 @@ export { endpoints, API_BASE_URL } from "./endpoints";
 
 
 /**
- * The single API instance the UI talks to. The mock layer is an explicit opt-in for isolated UI development;
- * production and deployed environments use the real backend by default.
+ * The single API instance the UI talks to. The UI always uses the configured real backend; no fabricated data adapter is included.
  */
 export const museApi: MuseApi = httpApi;
 
