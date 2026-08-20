@@ -38,7 +38,7 @@ The backend boundary can be run with `uvicorn app.main:app --app-dir apps/intell
 
 The following values must be supplied by the deployment owner before private routes can be enabled:
 
-- An authentication provider adapter that verifies the deployment's session or bearer token and returns the authenticated user id.
+- The existing cookie-session authentication implementation: the frontend sends `credentials: include` and expects `/api/v1/auth/sign-in`, `/api/v1/auth/sign-up`, `/api/v1/auth/sign-out`, and `/api/v1/auth/me` to share that session.
 - A durable upload/object-storage implementation for document bytes.
 - `MUSE_DATABASE_PATH` pointing at persistent storage; the Render configuration uses `/var/data/muse.sqlite3`.
 - `MUSE_CORS_ORIGINS` set to the exact published frontend origin(s).
