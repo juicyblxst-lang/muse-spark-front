@@ -17,8 +17,9 @@ import type {
 } from "@/types/api";
 
 /**
- * Static fixtures only. No inference, scoring or generation logic lives here —
- * every value is authored data standing in for a future backend response.
+ * Isolated demo fixtures for explicit VITE_MUSE_API_MODE=mock development only.
+ * These values must never be enabled in a user-facing or production environment.
+ * No inference, scoring or generation logic lives here.
  */
 
 export const mockUser: User = {
