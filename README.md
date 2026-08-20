@@ -35,3 +35,17 @@ The frontend must be deployed with the API origin and authentication/CORS config
 ## Intelligence service
 
 The backend boundary can be run with `uvicorn app.main:app --app-dir apps/intelligence --port 8000` or built from `apps/intelligence/Dockerfile`. `GET /health` is the only operational endpoint currently verified by source inspection. Product routes intentionally return controlled `401` or `501` responses until authentication, persistence, and external intelligence configuration are supplied; they do not return fabricated user data.
+
+
+## Remaining production configuration
+
+The following values must be supplied by the deployment owner before private routes can be enabled:
+
+- An authentication provider adapter that verifies the deployment's session or bearer token and returns the authenticated user id.
+- A durable upload/object-storage implementation for document bytes.
+- `MUSE_DATABASE_PATH` pointing at persistent storage; the Render configuration uses `/var/data/muse.sqlite3`.
+- `MUSE_CORS_ORIGINS` set to the exact published frontend origin(s).
+- The configured LLM provider, model, and credential for extraction, relationship, and temporal analysis.
+- The external MemoryService/Sibyl and OpenClaw runtime configuration, when those boundaries are ready.
+
+No default user, token, document, memory, LLM response, or external runtime is fabricated by the service.
