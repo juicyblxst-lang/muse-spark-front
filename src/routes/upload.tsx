@@ -39,6 +39,7 @@ interface Queued {
   name: string;
   sizeBytes: number;
   kind: DocumentKind;
+  file: File;
 }
 
 function toQueued(file: File): Queued | null {
@@ -50,6 +51,7 @@ function toQueued(file: File): Queued | null {
     name: file.name,
     sizeBytes: file.size,
     kind,
+    file,
   };
 }
 
@@ -77,16 +79,25 @@ function UploadPage() {
     if (queue.length === 0) return;
     setSending(true);
     try {
-      const targets = await Promise.all(
-        queue.map((item) =>
-          museApi.createUpload({
+      const uploads = await Promise.all(
+        queue.map(async (item) => {
+          const target = await museApi.createUpload({
             fileName: item.name,
             kind: item.kind,
             sizeBytes: item.sizeBytes,
-          }),
-        ),
+          });
+          const response = await fetch(target.uploadUrl, {
+            method: "PUT",
+            headers: item.file.type ? { "content-type": item.file.type } : undefined,
+            body: item.file,
+          });
+          if (!response.ok) {
+            throw new Error("Muse upload failed (" + response.status + ")");
+          }
+          return target;
+        }),
       );
-      const first = targets[0];
+      const first = uploads[0];
       toast.success(`${queue.length} file(s) handed to Muse`);
       setQueue([]);
       if (first) await navigate({ to: "/processing/$jobId", params: { jobId: first.jobId } });
