@@ -91,8 +91,7 @@ function AuthPage() {
                     name="email"
                     type="email"
                     required
-                    defaultValue="you@muse.studio"
-                  />
+                                      />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signin-password">Password</Label>
@@ -101,8 +100,7 @@ function AuthPage() {
                     name="password"
                     type="password"
                     required
-                    defaultValue="muse"
-                  />
+                                      />
                 </div>
                 <Button type="submit" className="w-full" disabled={pending}>
                   {pending ? "Opening archive…" : "Sign in"}
