@@ -12,10 +12,7 @@ The repository currently contains the frontend and a small intelligence pipeline
 
 Required for a connected deployment:
 
-- VITE_MUSE_API_MODE=http (the default; keep this explicit in deployment configuration)
 - VITE_MUSE_API_URL (optional origin; omit when the API is served by the same origin)
-
-For isolated UI development only, set VITE_MUSE_API_MODE=mock. Mock fixtures are demo data and must never be enabled in a user-facing or production environment.
 
 ## Development
 
