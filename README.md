@@ -30,3 +30,8 @@ npm run lint
 ## Deployment notes
 
 The frontend must be deployed with the API origin and authentication/CORS configuration supplied by the backend host. Do not commit credentials or .env files. A deployment is not end-to-end ready until the backend implements the documented routes in src/lib/api/endpoints.ts and the connected flow has been tested with real authentication and user-scoped data.
+
+
+## Intelligence service
+
+The backend boundary can be run with `uvicorn app.main:app --app-dir apps/intelligence --port 8000` or built from `apps/intelligence/Dockerfile`. `GET /health` is the only operational endpoint currently verified by source inspection. Product routes intentionally return controlled `401` or `501` responses until authentication, persistence, and external intelligence configuration are supplied; they do not return fabricated user data.
