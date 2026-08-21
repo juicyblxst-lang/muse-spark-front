@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     storage_bucket: str = "muse-documents"
     storage_root: str = "./data"
 
-    # LLM / OpenClaw
+    # LLM / OpenClaw (optional until the intelligence runtime is integrated)
     llm_provider: str = ""
     llm_api_key: SecretStr | None = None
     llm_model: str = ""
@@ -58,13 +58,13 @@ class Settings(BaseSettings):
         if self.environment != "production":
             return self
 
+        # Core production dependencies required for the deployed API itself.
+        # LLM/OpenClaw are intentionally optional until the intelligence runtime
+        # is integrated; their absence must not prevent health/auth/storage deployment.
         required = {
             "SUPABASE_URL": self.supabase_url,
             "SUPABASE_PUBLISHABLE_KEY": self.supabase_publishable_key,
             "SUPABASE_SERVICE_ROLE_KEY": self.supabase_service_role_key,
-            "LLM_API_KEY": self.llm_api_key,
-            "LLM_MODEL": self.llm_model,
-            "OPENCLAW_API_KEY": self.openclaw_api_key,
             "SIBYL_DB_PATH": self.sibyl_db_path,
         }
         missing = [name for name, value in required.items() if value is None or (isinstance(value, str) and not value.strip())]
